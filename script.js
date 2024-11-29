@@ -4,7 +4,9 @@ num1 = num2 = operator = '';
 let controls = document.getElementById('controls');
 let display = document.getElementById('display');
 document.getElementById('evaluate').addEventListener('click', evaluate);
-controls.querySelectorAll('.digit, .operator').forEach(btn => btn.addEventListener('click', (ev) => handleInput(ev)));
+controls.querySelectorAll('.digit, .operator').forEach(
+    btn => btn.addEventListener('click', (ev) => handleInput(ev))
+);
 document.getElementById('clear').addEventListener('click', clear);
 
 function operate() {
@@ -41,7 +43,10 @@ function updateNumbers() {
 }
 
 function handleInput(ev) {
-    const type = ev.target.classList.contains('operator') ? 'operator' : ev.target.classList.contains('digit') ? 'number' : '';
+    const type = ev.target.classList.contains('operator') ?
+        'operator'
+        : ev.target.classList.contains('digit') ?
+            'number' : '';
     if (type == 'number') {
         parseNumberInput(ev.target.textContent);
     } else if (type == 'operator') {

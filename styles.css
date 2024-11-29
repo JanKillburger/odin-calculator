@@ -1,0 +1,35 @@
+.calculator {
+    max-width: 200px;
+    border: 2px solid lightgray;
+    border-radius: 0.3em;
+    padding: 0.5em;
+}
+
+.display {
+    min-height: 1.3em;
+    padding: 0.5em 0.7em;
+    border: 1px solid gray;
+    border-radius: 0.3em;
+}
+
+.controls {
+    --gap: 0.5em;
+    --key-size: 2em;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap);
+
+    .row {
+        display: flex;
+        gap: var(--gap);
+    }
+
+    button {
+        height: 2em;
+        min-width: var(--key-size);
+    }
+
+    .large {
+        min-width: calc(2 * var(--key-size) + var(--gap));
+    }
+}

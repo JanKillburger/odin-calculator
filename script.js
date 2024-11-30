@@ -74,8 +74,12 @@ function parseNumberInput(increment) {
 }
 
 function evaluate() {
-    updateNumbers();
-    operator = '';
+    if (num1 !== '' && num2 !== '') {
+        updateNumbers();
+        operator = '';
+    } else {
+        operator = '';
+    }
     updateDisplay();
 }
 

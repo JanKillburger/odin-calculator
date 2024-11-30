@@ -13,6 +13,20 @@ controls.querySelectorAll('.digit, .operator, .delete').forEach(
 );
 document.getElementById('clear').addEventListener('click', clear);
 
+window.addEventListener('keyup', (ev) => handleKeyboardInput(ev))
+
+function handleKeyboardInput(ev) {
+    if (ev.key == "Backspace") {
+        deletePreviousEntry();
+    }
+    if (ev.key.match(/[\d\.,]/)) {
+        parseNumberInput(ev.key == "," ? "." : ev.key);
+    } else if (ev.key.match(/[+\-*\/]/)) {
+        handleOperatorInput(ev.key);
+    }
+    updateDisplay();
+}
+
 function operate() {
     if (num1 == '' || num2 == '') throw new Error("Function operate: at least one operand is undefined.");
     const operand1 = parseFloat(num1);
@@ -54,15 +68,19 @@ function handleInput(ev) {
     if (type == 'number') {
         parseNumberInput(ev.target.textContent);
     } else if (type == 'operator') {
-        if (operator) {
-            updateNumbers();
-        }
-        operator = ev.target.textContent;
-        decimalDisabled = false;
+        handleOperatorInput(ev.target.textContent);
     } else {
         deletePreviousEntry();
     }
     updateDisplay();
+}
+
+function handleOperatorInput(operatorInput) {
+    if (operator) {
+        updateNumbers();
+    }
+    operator = operatorInput;
+    decimalDisabled = false;
 }
 
 function parseNumberInput(increment) {

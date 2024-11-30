@@ -99,7 +99,11 @@ function parseNumberInput(increment) {
 
 function deletePreviousEntry() {
     if (operator) {
-        num2 = num2.slice(0, -1);
+        if (num2) {
+            num2 = num2.slice(0, -1);
+        } else {
+            operator = '';
+        }
     } else {
         num1 = num1.slice(0, -1);
     }

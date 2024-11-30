@@ -6,8 +6,9 @@ let controls = document.getElementById('controls');
 let display = document.getElementById('display');
 let evaluateBtn = document.getElementById('evaluate');
 let decimalBtn = document.getElementById('decimal-btn');
+let deleteBtn = document.getElementById('delete');
 evaluateBtn.addEventListener('click', evaluate);
-controls.querySelectorAll('.digit, .operator').forEach(
+controls.querySelectorAll('.digit, .operator, .delete').forEach(
     btn => btn.addEventListener('click', (ev) => handleInput(ev))
 );
 document.getElementById('clear').addEventListener('click', clear);
@@ -49,7 +50,7 @@ function handleInput(ev) {
     const type = ev.target.classList.contains('operator') ?
         'operator'
         : ev.target.classList.contains('digit') ?
-            'number' : '';
+            'number' : 'delete';
     if (type == 'number') {
         parseNumberInput(ev.target.textContent);
     } else if (type == 'operator') {
@@ -58,6 +59,8 @@ function handleInput(ev) {
         }
         operator = ev.target.textContent;
         decimalDisabled = false;
+    } else {
+        deletePreviousEntry();
     }
     updateDisplay();
 }
@@ -70,6 +73,14 @@ function parseNumberInput(increment) {
     }
     if (isNaN(increment)) {
         decimalDisabled = true;
+    }
+}
+
+function deletePreviousEntry() {
+    if (operator) {
+        num2 = num2.slice(0, -1);
+    } else {
+        num1 = num1.slice(0, -1);
     }
 }
 

@@ -1,9 +1,12 @@
 let num1, num2, operator;
+let decimalDisabled = false;
 num1 = num2 = operator = '';
 
 let controls = document.getElementById('controls');
 let display = document.getElementById('display');
-document.getElementById('evaluate').addEventListener('click', evaluate);
+let evaluateBtn = document.getElementById('evaluate');
+let decimalBtn = document.getElementById('decimal-btn');
+evaluateBtn.addEventListener('click', evaluate);
 controls.querySelectorAll('.digit, .operator').forEach(
     btn => btn.addEventListener('click', (ev) => handleInput(ev))
 );
@@ -54,6 +57,7 @@ function handleInput(ev) {
             updateNumbers();
         }
         operator = ev.target.textContent;
+        decimalDisabled = false;
     }
     updateDisplay();
 }
@@ -63,6 +67,9 @@ function parseNumberInput(increment) {
         num2 = num2 + increment;
     } else {
         num1 = num1 + increment;
+    }
+    if (isNaN(increment)) {
+        decimalDisabled = true;
     }
 }
 
@@ -74,9 +81,11 @@ function evaluate() {
 
 function clear() {
     num1 = num2 = operator = '';
+    decimalDisabled = false;
     updateDisplay();
 }
 
 function updateDisplay() {
     display.textContent = num1 + operator + num2;
+    decimalBtn.disabled = decimalDisabled;
 }

@@ -16,6 +16,9 @@ document.getElementById('clear').addEventListener('click', clear);
 window.addEventListener('keyup', (ev) => handleKeyboardInput(ev))
 
 function handleKeyboardInput(ev) {
+    if (ev.key == "Enter") {
+        evaluate();
+    }
     if (ev.key == "Backspace") {
         deletePreviousEntry();
     }

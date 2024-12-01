@@ -25,7 +25,7 @@ function handleKeyboardInput(ev) {
         const inputState = getCurrentInputState(ev.key);
         if (inputState == 'num1' || inputState == 'num2') {
             parseNumberInput(inputState, ev.key == ',' ? '.' : ev.key);
-            if (isNaN(ev.key)) {
+            if (ev.key.match(/[\.,]/)) {
                 decimalDisabled = true;
             }
         } else if (inputState == 'operator') {
@@ -37,7 +37,7 @@ function handleKeyboardInput(ev) {
 
 function getCurrentInputState(userInput) {
     if (num1 == null || (operator == null && userInput.match(/[\d\.,]/))) return 'num1';
-    if (operator == null) return 'operator';
+    if ((operator == null || num2 !== null) && userInput.match(/[+\-*\/]/)) return 'operator';
     return 'num2';
 }
 
@@ -76,6 +76,9 @@ function handleGUIInput(ev) {
     const inputState = getCurrentInputState(ev.target.textContent)
     if (inputState == 'num1' || inputState == 'num2') {
         parseNumberInput(inputState, ev.target.textContent);
+        if (ev.target.textContent.match(/[\.,]/)) {
+            decimalDisabled = true;
+        }
     } else if (inputState == 'operator') {
         handleOperatorInput(ev.target.textContent);
     }
@@ -92,9 +95,17 @@ function handleOperatorInput(operatorInput) {
 
 function parseNumberInput(inputState, increment) {
     if (inputState == 'num1') {
-        num1 = parseFloat(toStringRepresentation(num1) + increment);
+        num1 = isNaN(getNewValue()) ? 0 : getNewValue();
     } else if (inputState == 'num2') {
-        num2 = parseFloat(toStringRepresentation(num2) + increment);
+        num2 = isNaN(getNewValue()) ? 0 : getNewValue();
+    }
+
+    function getNewValue() {
+        if (inputState == 'num1') {
+            return parseFloat((num1 ?? '') + (decimalDisabled ? '.' : '') + increment);
+        } else {
+            return parseFloat((num2 ?? '') + (decimalDisabled ? '.' : '') + increment);
+        }
     }
 }
 
@@ -120,10 +131,8 @@ function deletePreviousEntry() {
 function evaluate() {
     if (num1 !== null && num2 !== null) {
         updateNumbers();
-        operator = null;
-    } else {
-        operator = null;
     }
+    operator = null;
     updateDisplay();
 }
 
@@ -134,13 +143,22 @@ function clear() {
 }
 
 function updateDisplay() {
-    display.textContent = `${toStringRepresentation(num1)} ${toStringRepresentation(operator)} ${toStringRepresentation(num2)}`;
+    display.textContent = `${toStringRepresentation(num1)}${getNumDecimalPoint('num1')} ${toStringRepresentation(operator)} ${toStringRepresentation(num2)}${getNumDecimalPoint('num2')}`;
     decimalBtn.disabled = decimalDisabled;
+
+    function toStringRepresentation(expression) {
+        if (typeof expression === 'number' && expression < 0) {
+            return `(${expression})`;
+        }
+        return !expression ? '' : String(expression);
+    }
+
 }
 
-function toStringRepresentation(expression) {
-    if (typeof expression === 'number' && expression < 0) {
-        return `(${expression})`;
+function getNumDecimalPoint(num) {
+    if (num == 'num1') {
+        return operator == null && decimalDisabled && ((num1 ?? 0) % 1 == 0) ? '.' : '';
+    } else {
+        return operator !== null && decimalDisabled && ((num2 ?? 0) % 1 == 0) ? '.' : '';
     }
-    return !expression ? '' : String(expression);
 }

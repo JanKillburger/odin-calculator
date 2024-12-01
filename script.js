@@ -1,43 +1,52 @@
 let num1, num2, operator;
 let decimalDisabled = false;
-num1 = num2 = operator = '';
+num1 = num2 = operator = null;
 
 let controls = document.getElementById('controls');
 let display = document.getElementById('display');
 let evaluateBtn = document.getElementById('evaluate');
 let decimalBtn = document.getElementById('decimal-btn');
-let deleteBtn = document.getElementById('delete');
+let deleteBtn = document.getElementById('delete-btn');
 evaluateBtn.addEventListener('click', evaluate);
+deleteBtn.addEventListener('click', deletePreviousEntry);
 controls.querySelectorAll('.digit, .operator, .delete').forEach(
-    btn => btn.addEventListener('click', (ev) => handleInput(ev))
+    btn => btn.addEventListener('click', (ev) => handleGUIInput(ev))
 );
 document.getElementById('clear').addEventListener('click', clear);
 
 window.addEventListener('keyup', (ev) => handleKeyboardInput(ev))
 
 function handleKeyboardInput(ev) {
-    if (ev.key == "Enter") {
+    if (ev.key == 'Enter') {
         evaluate();
-    }
-    if (ev.key == "Backspace") {
+    } else if (ev.key == 'Backspace') {
         deletePreviousEntry();
-    }
-    if (ev.key.match(/[\d\.,]/)) {
-        parseNumberInput(ev.key == "," ? "." : ev.key);
-    } else if (ev.key.match(/[+\-*\/]/)) {
-        handleOperatorInput(ev.key);
+    } else {
+        const inputState = getCurrentInputState(ev.key);
+        if (inputState == 'num1' || inputState == 'num2') {
+            parseNumberInput(inputState, ev.key == ',' ? '.' : ev.key);
+            if (isNaN(ev.key)) {
+                decimalDisabled = true;
+            }
+        } else if (inputState == 'operator') {
+            handleOperatorInput(ev.key);
+        }
     }
     updateDisplay();
 }
 
+function getCurrentInputState(userInput) {
+    if (num1 == null || (operator == null && userInput.match(/[\d\.,]/))) return 'num1';
+    if (operator == null) return 'operator';
+    return 'num2';
+}
+
 function operate() {
-    if (num1 == '' || num2 == '') throw new Error("Function operate: at least one operand is undefined.");
-    const operand1 = parseFloat(num1);
-    const operand2 = parseFloat(num2);
-    if (operator === "+") return add(operand1, operand2);
-    if (operator === "-") return subtract(operand1, operand2);
-    if (operator === "*") return multiply(operand1, operand2);
-    if (operator === "/") return divide(operand1, operand2);
+    if (num1 == null || num2 == null) throw new Error('Function operate: at least one operand is undefined.');
+    if (operator === '+') return add(num1, num2);
+    if (operator === '-') return subtract(num1, num2);
+    if (operator === '*') return multiply(num1, num2);
+    if (operator === '/') return divide(num1, num2);
     throw new Error(`Function operate: invalid operator: ${operator}`);
 }
 
@@ -54,26 +63,21 @@ function multiply(num1, num2) {
 }
 
 function divide(num1, num2) {
-    if (num2 === 0) throw new Error("function divide: division by zero");
+    if (num2 === 0) throw new Error('function divide: division by zero');
     return num1 / num2;
 }
 
 function updateNumbers() {
-    num1 = operate(num1, operator, num2);
-    num2 = '';
+    num1 = operate();
+    num2 = null;
 }
 
-function handleInput(ev) {
-    const type = ev.target.classList.contains('operator') ?
-        'operator'
-        : ev.target.classList.contains('digit') ?
-            'number' : 'delete';
-    if (type == 'number') {
-        parseNumberInput(ev.target.textContent);
-    } else if (type == 'operator') {
+function handleGUIInput(ev) {
+    const inputState = getCurrentInputState(ev.target.textContent)
+    if (inputState == 'num1' || inputState == 'num2') {
+        parseNumberInput(inputState, ev.target.textContent);
+    } else if (inputState == 'operator') {
         handleOperatorInput(ev.target.textContent);
-    } else {
-        deletePreviousEntry();
     }
     updateDisplay();
 }
@@ -86,46 +90,57 @@ function handleOperatorInput(operatorInput) {
     decimalDisabled = false;
 }
 
-function parseNumberInput(increment) {
-    if (operator) {
-        num2 = num2 + increment;
-    } else {
-        num1 = num1 + increment;
-    }
-    if (isNaN(increment)) {
-        decimalDisabled = true;
+function parseNumberInput(inputState, increment) {
+    if (inputState == 'num1') {
+        num1 = parseFloat(toStringRepresentation(num1) + increment);
+    } else if (inputState == 'num2') {
+        num2 = parseFloat(toStringRepresentation(num2) + increment);
     }
 }
 
 function deletePreviousEntry() {
     if (operator) {
         if (num2) {
-            num2 = num2.slice(0, -1);
+            num2 = getNewValue(num2);
         } else {
-            operator = '';
+            operator = null;
         }
     } else {
-        num1 = num1.slice(0, -1);
+        num1 = getNewValue(num1);
+    }
+
+    function getNewValue(num) {
+        return num && String(num).length > 1 ?
+            parseFloat(String(num).slice(0, -1))
+            :
+            null;
     }
 }
 
 function evaluate() {
-    if (num1 !== '' && num2 !== '') {
+    if (num1 !== null && num2 !== null) {
         updateNumbers();
-        operator = '';
+        operator = null;
     } else {
-        operator = '';
+        operator = null;
     }
     updateDisplay();
 }
 
 function clear() {
-    num1 = num2 = operator = '';
+    num1 = num2 = operator = null;
     decimalDisabled = false;
     updateDisplay();
 }
 
 function updateDisplay() {
-    display.textContent = num1 + operator + num2;
+    display.textContent = `${toStringRepresentation(num1)} ${toStringRepresentation(operator)} ${toStringRepresentation(num2)}`;
     decimalBtn.disabled = decimalDisabled;
+}
+
+function toStringRepresentation(expression) {
+    if (typeof expression === 'number' && expression < 0) {
+        return `(${expression})`;
+    }
+    return !expression ? '' : String(expression);
 }

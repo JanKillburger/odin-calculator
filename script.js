@@ -121,10 +121,16 @@ function deletePreviousEntry() {
     }
 
     function getNewValue(num) {
-        return num && String(num).length > 1 ?
-            parseFloat(String(num).slice(0, -1))
-            :
-            null;
+        const numString = String(num);
+        if (numString.includes('.') || !decimalDisabled) {
+            return num && numString.length > 1 ?
+                parseFloat(numString.slice(0, -1))
+                :
+                null;
+        } else if (decimalDisabled) {
+            decimalDisabled = false;
+            return num;
+        }
     }
 }
 
@@ -133,6 +139,7 @@ function evaluate() {
         updateNumbers();
     }
     operator = null;
+    decimalDisabled = false;
     updateDisplay();
 }
 
